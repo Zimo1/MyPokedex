@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/introFragment">
+
+    <fragment
+        android:id="@+id/menuFragment"
+        android:name="ru.yodata.mypokedex.view.MenuFragment"
+        android:label="fragment_menu"
+        tools:layout="@layout/fragment_menu" >
+        <action
+            android:id="@+id/action_menuFragment_to_pokeSearchFragment"
+            app:destination="@id/pokeSearchFragment" />
+        <action
+            android:id="@+id/action_menuFragment_to_pokedexFragment"
+            app:destination="@id/pokedexFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/pokeSearchFragment"
+        android:name="ru.yodata.mypokedex.view.PokeSearchFragment"
+        android:label="fragment_poke_search"
+        tools:layout="@layout/fragment_poke_search" >
+        <action
+            android:id="@+id/action_pokeSearchFragment_to_pokedexFragment"
+            app:destination="@id/pokedexFragment" />
+        <argument
+            android:name="searchMode"
+            app:argType="string"
+            android:defaultValue="MANUAL" />
+    </fragment>
+    <fragment
+        android:id="@+id/introFragment"
+        android:name="ru.yodata.mypokedex.view.IntroFragment"
+        android:label="fragment_intro"
+        tools:layout="@layout/fragment_intro" >
+        <action
+            android:id="@+id/action_introFragment_to_menuFragment"
+            app:destination="@id/menuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/pokedexFragment"
+        android:name="ru.yodata.mypokedex.view.PokedexFragment"
+        android:label="pokedex_fragment"
+        tools:layout="@layout/pokedex_fragment" />
+</navigation>
