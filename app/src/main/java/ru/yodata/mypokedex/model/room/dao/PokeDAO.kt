@@ -11,9 +11,14 @@ interface PokeDAO {
     fun pokeInsert(pokeCard: PokeCard)
 
     // Read
-    // Получение всех записей БД
+    // Получение всех записей БД в виде LiveData (для отображения в RecyclerView)
     @Query("SELECT * FROM pokeCard ORDER BY rowid DESC") //новые записи будут идти первыми
     fun pokeGetAll(): LiveData<List<PokeCard>>
+
+    // Получение всех записей БД в обычном виде.
+    // В предыдущей команде LiveData не отдает данные из БД напрямую (всегда возвращается null)
+    @Query("SELECT * FROM pokeCard")
+    fun pokeGetAllValue(): List<PokeCard>
 
     // Получение одной записи БД по заданному имени покемона
     @Query("SELECT * FROM pokeCard WHERE pokeName == :pokeName")
@@ -27,6 +32,7 @@ interface PokeDAO {
     @Delete
     fun pokeDelete(pokeCard: PokeCard)
 
+    // Delete all
     @Query("DELETE from pokeCard")
     fun pokeDeleteAll()
 

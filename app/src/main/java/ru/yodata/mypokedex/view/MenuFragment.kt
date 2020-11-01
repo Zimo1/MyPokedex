@@ -22,12 +22,14 @@ class MenuFragment : Fragment() {
         with (menuLayout) {
             // Поиск по набранному пользователем имени
             searchBtn.setOnClickListener { view ->
+                // Передать через бандл следующему фраменту режим поиска "MANUAL" (ручной)
                 val bundle = bundleOf("searchMode" to "MANUAL")
                 view.findNavController().
                     navigate(R.id.action_menuFragment_to_pokeSearchFragment, bundle)
             }
             // Случайный поиск
             randomBtn.setOnClickListener { view ->
+                // Передать через бандл следующему фраменту режим поиска "RANDOM" (случайный)
                 val bundle = bundleOf("searchMode" to "RANDOM")
                 view.findNavController().
                     navigate(R.id.action_menuFragment_to_pokeSearchFragment, bundle)

@@ -43,7 +43,7 @@ class PokeSearchFragment : Fragment() {
             // При запуске этого фрагмента ему на вход через bundle передается параметр -
             // "Режим поиска": ручной ("MANUAL") либо случайный ("RANDOM")
             // Вид фрагмента настраивается в зависимости от режима
-            val searchMode = arguments!!.getString("searchMode")
+            val searchMode = requireArguments().getString("searchMode")
             when (searchMode) {
                 "MANUAL" -> {
                     searchHeaderTV.text = "Поиск покемона по имени"
@@ -54,7 +54,9 @@ class PokeSearchFragment : Fragment() {
                     searchNameTextView.visibility = TextView.INVISIBLE
                 }
             }
-            searchProgressBar.visibility = ProgressBar.INVISIBLE
+            // Заполнить выпадающий список элемента AutoCompleteTextView ("searchNameTextView")
+            // значениями имен покемонов для быстрого ввода.
+            // Для этого создать spinnerAdapter
             if (!pokemonList.isNullOrEmpty()) {
                 val spinnerAdapter: ArrayAdapter<Results> = ArrayAdapter<Results>(
                     context, R.layout.support_simple_spinner_dropdown_item,
@@ -75,22 +77,26 @@ class PokeSearchFragment : Fragment() {
 
     // Получение данных покемона с сервера по ссылке и вывод их на экран
     fun getPokeDataByURLAndShow(pokeURL: String) {
-        Log.d(TAG, "Проверка pokeURL...")
+        //Log.d(TAG, "Проверка pokeURL...")
         if (!pokeURL.isNullOrEmpty()) {
+            // Необходимо убрать из URL покемона путь к серверу REST API, т.к он уже указан в
+            // параметре Retrofit ".baseUrl", иначе произойдет ошибка при наложении ссылок
             val shortPokeURL = pokeURL.substring(SERVER_URL.length)
             Log.d(TAG, "pokeURL = $shortPokeURL")
+            // Чтение данных покемона с сервера REST API с использованием Retrofit и RxJava
             disposable = REST_API_Client.getPokemonData(shortPokeURL)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,
-                    {error -> Log.d(TAG, "Ошибка REST при запросе покемона: " + error.localizedMessage)})
+                    {error -> Log.d(TAG, "Ошибка REST при запросе покемона: "
+                            + error.localizedMessage)})
         }
     }
 
     // Обработчик RxJava-отклика на запрос данных покемона с сервера REST API.
-    // Запись полученных данных в карточку текущего покемона
+    // Запись полученных данных в карточку текущего покемона и отображение их на экране
     private fun handleResponse(response: PokemonData) {
-        searchProgressBar.visibility = ProgressBar.VISIBLE
+        //searchProgressBar.visibility = ProgressBar.VISIBLE
         pokeCard = with (response) {
             PokeCard(
                 pokeName = name,
@@ -102,7 +108,8 @@ class PokeSearchFragment : Fragment() {
                 pokeExperience = baseExperience
             )
         }
-        searchProgressBar.visibility = ProgressBar.INVISIBLE
+        //searchProgressBar.visibility = ProgressBar.INVISIBLE
+        // Отобразить на экране
         showPokemonCard()
         Log.d(TAG, "Получен ответ REST по запрошенному покемону ${response.name}")
     }
@@ -127,6 +134,7 @@ class PokeSearchFragment : Fragment() {
             }
             favoritesBtn.setOnClickListener {onFavoritesButtonClick()}
             // Сделать карточку покемона видимой
+            searchProgressBar.visibility = ProgressBar.GONE
             pokeViewLayout.visibility = ConstraintLayout.VISIBLE
         }
     }
@@ -135,7 +143,7 @@ class PokeSearchFragment : Fragment() {
     fun onSearchButtonClick(view: View) {
         //Если запущен случайный режим поиска покемонов, то строке поиска присвоить случайное имя
         // из существующего списка покемонов pokemonList
-        if (arguments!!.getString("searchMode") == "RANDOM") {
+        if (requireArguments().getString("searchMode") == "RANDOM") {
             searchNameTextView.setText(pokemonList!!.random().pokeName)
         }
         if (searchNameTextView.text.isNullOrEmpty()) { //Строка ввода имени покемона пуста
@@ -150,9 +158,9 @@ class PokeSearchFragment : Fragment() {
                 { it.pokeName.trim().toLowerCase() == pokeSearchName }
             if (pokeItem != null) {
                 // Имя покемона найдено в списке покемонов.
-                // Прочитать его данные с сервера по URL, взятому из списка,  и отобразить их на экране
-                //searchProgressBar.visibility = ProgressBar.VISIBLE
-                pokeViewLayout.visibility = ConstraintLayout.INVISIBLE
+                // Прочитать его данные с сервера по URL, взятому из списка, и отобразить их на экране
+                pokeViewLayout.visibility = ConstraintLayout.GONE
+                searchProgressBar.visibility = ProgressBar.VISIBLE
                 getPokeDataByURLAndShow(pokeItem.pokeURL)
                 //searchProgressBar.visibility = ProgressBar.GONE
             }
@@ -177,11 +185,13 @@ class PokeSearchFragment : Fragment() {
                     navigate(R.id.action_pokeSearchFragment_to_pokedexFragment)
             }
             else {
-                // если такой покемон уже есть в Избранном, вывести сообщение об этом на экран
                 Log.d(TAG, "Попытка внести в Избранное существующего там покемона $pokeName")
-                activity!!.runOnUiThread(Runnable {
+                // Если такой покемон уже есть в Избранном, вывести сообщение об этом на экран.
+                // Т.к.процесс сейчас идет не в главном потоке, то для вывода сообщения на экран
+                // (т.е. в главный поток) необходимо обернуть его вызов в runOnUiThread
+                requireActivity().runOnUiThread(Runnable {
                 Toast.makeText(
-                    activity!!.applicationContext,
+                    requireActivity().applicationContext,
                     "Покемон с именем '$pokeName' уже находится в Избранном",
                     Toast.LENGTH_LONG
                 ).show()
