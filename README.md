@@ -15,5 +15,5 @@
 - MVVM
 - Retrofit
 - Navigation Architecture Component
-- БД - Room (еще лучше, если сможете хранить их удаленно в Firebase)
+- БД - Room
 
