@@ -39,11 +39,12 @@ class PokedexFragment : Fragment() {
         // Подключение к данным
         viewModel = ViewModelProviders.of(this).get(PokedexViewModel::class.java)
         pokedexRecyclerView.layoutManager = LinearLayoutManager(activity)
-        // Observe the model
+        // Подписка на viewmodel
         viewModel.pokedex.observe(viewLifecycleOwner, Observer{ pokemons->
-            // Data bind the recycler view
+            // Привязка данных RecyclerView
             pokedexRecyclerView.adapter = PokeRecyclerViewAdapter(pokemons)
         })
+        // Подключение обработчика кнопки удаления всех покемонов из Избранного
         pokesDeleteButton.setOnClickListener { onPokemonsDeleteButtonClick() }
     }
 
